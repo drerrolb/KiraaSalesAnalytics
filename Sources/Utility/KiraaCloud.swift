@@ -6,12 +6,6 @@
 //
 
 
-//
-//  KiraaCloud.swift
-//  kiraa
-//
-//  Created by Errol Brandt on 7/3/2025.
-//
 
 import SpriteKit
 import GameplayKit

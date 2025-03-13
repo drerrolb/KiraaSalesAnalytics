@@ -1,3 +1,10 @@
+//
+//  ViewController.swift
+//  KiraaSalesAnalytics
+//
+//  Created by Errol Brandt on 9/3/2025.
+//
+
 import Cocoa
 import SpriteKit
 import GameplayKit
@@ -10,6 +17,9 @@ class ViewController: NSViewController {
     
     // Single button that changes title.
     var launchButton: NSButton!
+    
+    // Additional button to explicitly close the window.
+    var closeButton: NSButton!
     
     var cpuGraphView: LineGraphView!
     var memoryGraphView: LineGraphView!
@@ -45,6 +55,9 @@ class ViewController: NSViewController {
     var statusLabel: NSTextField!
     // Position label (left-aligned).
     var positionLabel: NSTextField!
+    
+    // Dismiss callback used to notify SwiftUI to dismiss the sheet.
+    var dismissCallback: (() -> Void)?
     
     override func loadView() {
         // Create a container view to host both the SKView and UI overlays.
@@ -124,7 +137,7 @@ class ViewController: NSViewController {
             print("ERROR: skView outlet is nil. Verify your outlet connections in Interface Builder.")
         }
         
-        // 2) Create the single button.
+        // 2) Create the launch button.
         let buttonWidth: CGFloat = 250
         let buttonHeight: CGFloat = 80
         let centerX = (self.view.bounds.width - buttonWidth) / 2.0
@@ -218,7 +231,27 @@ class ViewController: NSViewController {
                                            repeats: true)
         print("Started updateTimer for CPU and Memory usage.")
         
+        // 7) Create an explicit close button to let users close the window.
+        closeButton = NSButton(title: "Close Window", target: self, action: #selector(closeWindow))
+        closeButton.bezelStyle = .rounded
+        // Position the close button at the top-left of the window.
+        closeButton.frame = NSRect(x: 20, y: self.view.bounds.height - 50, width: 120, height: 40)
+        closeButton.autoresizingMask = [.maxYMargin, .minXMargin]
+        self.view.addSubview(closeButton)
+        print("Close button added with frame: \(closeButton.frame)")
+        
         print("viewDidLoad completed. Final container frame: \(self.view.frame)")
+    }
+    
+    // Override viewDidAppear to update the window's style mask.
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        if let window = self.view.window {
+            // Set a full set of style options to display the title bar, close button, etc.
+            window.styleMask = [.titled, .closable, .resizable, .miniaturizable]
+            window.title = "Kiraa Sales Analytics"
+            print("Window style mask set to: \(window.styleMask)")
+        }
     }
     
     // MARK: - Cloud Rotation Update
@@ -327,5 +360,15 @@ class ViewController: NSViewController {
         let memUsage = getSystemMemoryUsage()
         cpuGraphView.addDataPoint(cpuUsage)
         memoryGraphView.addDataPoint(memUsage)
+    }
+    
+    // MARK: - Close Window Action
+    @objc func closeWindow() {
+        if let window = self.view.window {
+            window.performClose(nil)
+            print("Close button pressed, window closing.")
+        }
+        // Call the dismiss callback to notify SwiftUI that the sheet should be dismissed.
+        dismissCallback?()
     }
 }

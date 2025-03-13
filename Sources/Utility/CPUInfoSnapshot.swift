@@ -1,3 +1,11 @@
+//
+//  CPUInfoSnapshot.swift
+//  KiraaSalesAnalytics
+//
+//  Created by Errol Brandt on 9/3/2025.
+//
+
+
 import Foundation
 import Darwin  // For Mach APIs like mach_host_self()
 

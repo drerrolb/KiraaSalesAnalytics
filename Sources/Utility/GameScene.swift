@@ -1,5 +1,13 @@
 //
 //  GameScene.swift
+//  KiraaSalesAnalytics
+//
+//  Created by Errol Brandt on 9/3/2025.
+//
+
+
+//
+//  GameScene.swift
 //  kiraa-sales-analytics
 //
 //  Created by Errol Brandt on 8/3/2025.

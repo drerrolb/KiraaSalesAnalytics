@@ -3,55 +3,64 @@ import os.log
 
 class SAVariableGenerator {
 
-    // Array of all partial dictionaries.
+    // MARK: - Variable Dictionaries
     let dictionaries: [[String: [String: String]]] = [
         
+        // MARK: Actual - This Calendar Year
         ActualSalesThisCalendarYear.dictionary,
         ActualMarginThisCalendarYear.dictionary,
-        ActualVolumeThisCalendarYear.dictionary,
         ActualUnitThisCalendarYear.dictionary,
-        
+        ActualVolumeThisCalendarYear.dictionary,
+
+        // MARK: Actual - Last Calendar Year
+        ActualSalesLastCalendarYear.dictionary,
+        ActualMarginLastCalendarYear.dictionary,
+        ActualUnitLastCalendarYear.dictionary,
+        ActualVolumeLastCalendarYear.dictionary,
+
+        // MARK: Actual - This Financial Year
         ActualSalesThisFinancialYear.dictionary,
         ActualMarginThisFinancialYear.dictionary,
         ActualUnitThisFinancialYear.dictionary,
         ActualVolumeThisFinancialYear.dictionary,
-        
-        BudgetSalesThisFinancialYear.dictionary,
-        BudgetMarginThisFinancialYear.dictionary,
-        BudgetVolumeThisFinancialYear.dictionary,
-        BudgetUnitThisFinancialYear.dictionary,
-        
-        BudgetSalesThisCalendarYear.dictionary,
-        BudgetMarginThisCalendarYear.dictionary,
-        BudgetVolumeThisCalendarYear.dictionary,
-        BudgetUnitThisCalendarYear.dictionary,
-        
-        ActualSalesLastCalendarYear.dictionary,
-        ActualMarginLastCalendarYear.dictionary,
-        ActualVolumeLastCalendarYear.dictionary,
-        ActualUnitLastCalendarYear.dictionary,
 
+        // MARK: Actual - Last Financial Year
         ActualSalesLastFinancialYear.dictionary,
         ActualMarginLastFinancialYear.dictionary,
         ActualUnitLastFinancialYear.dictionary,
         ActualVolumeLastFinancialYear.dictionary,
-        
+
+        // MARK: Budget - This Calendar Year
+        BudgetSalesThisCalendarYear.dictionary,
+        BudgetMarginThisCalendarYear.dictionary,
+        BudgetUnitThisCalendarYear.dictionary,
+        BudgetVolumeThisCalendarYear.dictionary,
+
+        // MARK: Budget - Next Calendar Year
         BudgetSalesNextCalendarYear.dictionary,
-        
+
+        // MARK: Budget - This Financial Year
+        BudgetSalesThisFinancialYear.dictionary,
+        BudgetMarginThisFinancialYear.dictionary,
+        BudgetUnitThisFinancialYear.dictionary,
+        BudgetVolumeThisFinancialYear.dictionary,
+
+        // MARK: Budget - Next Financial Year
         BudgetSalesNextFinancialYear.dictionary,
-        
-        
+
+        // MARK: Forecast - This Calendar Year
         LockedForecastSalesThisCalendarYear.dictionary,
         UnlockedforecastSalesThisCalendarYear.dictionary,
-        
+
+        // MARK: Forecast - Next Calendar Year
         LockedforecastSalesNextCalendarYear.dictionary,
         UnlockedforecastSalesNextCalendarYear.dictionary,
-        
+
+        // MARK: Activities - This Calendar Year
         ActualCallThisCalendarYear.dictionary,
         ActualMeetingThisCalendarYear.dictionary,
         ActualProposalThisCalendarYear.dictionary,
         ActualDealThisCalendarYear.dictionary
-
     ]
     
     // Merge all dictionaries, overriding collisions by taking the second dictionary’s value.

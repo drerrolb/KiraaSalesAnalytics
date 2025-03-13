@@ -15,7 +15,7 @@ func generateAnalyticalDataFrame(updatedDataFrame: DataFrame,
     
     // 2) Create a new "analytical" DataFrame with the same number of rows.
     let rowCount = updatedDataFrame.rows.count
-    var analyticalDataFrame = EmptyDataFrameFactory.create(rowCount: rowCount)
+    var analyticalDataFrame = SA01Dataframe.create(rowCount: rowCount)
 
     // 3) Verify that required columns exist in `updatedDataFrame`
     let existingColumnNames = updatedDataFrame.columns.map(\.name)

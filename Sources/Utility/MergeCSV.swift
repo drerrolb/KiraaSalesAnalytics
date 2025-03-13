@@ -13,7 +13,7 @@ func createReorderedDataFrame(csvFiles: [URL]) throws -> URL {
                                             withIntermediateDirectories: true)
 
     // 2) Use the factory to get an empty DataFrame with all final columns
-    var df = EmptyDataFrameFactory.create(rowCount: 0)
+    var df = SA01Dataframe.create(rowCount: 0)
 
     // Extract the final column names from the columns just created
     let finalColumnNames = df.columns.map { $0.name }

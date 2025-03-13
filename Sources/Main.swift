@@ -1,62 +1,42 @@
 import SwiftUI
 import Foundation
 
-// This view provides a basic UI for triggering the integration process.
-struct ContentView: View {
-    @State private var statusMessage = "Ready"
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Kiraa Sales Analytics")
-                .font(.largeTitle)
-            Text(statusMessage)
-                .padding()
-            Button("Run Integration") {
-                Task {
-                    await runIntegration()
-                }
-            }
+// MARK: - ViewController Wrapper
+
+// Wrap your existing NSViewController in a SwiftUI-compatible view.
+struct ViewControllerWrapper: NSViewControllerRepresentable {
+    @Binding var isPresented: Bool
+
+    func makeNSViewController(context: Context) -> ViewController {
+        let vc = ViewController()
+        // When the NSViewController is told to close, update the binding.
+        vc.dismissCallback = {
+            isPresented = false
         }
-        .padding()
-        .frame(minWidth: 500, minHeight: 400)
+        return vc
     }
     
-    // This async function runs the integration loop.
-    func runIntegration() async {
-        statusMessage = "Running integration..."
-        
-        // Default the source file path.
-        let sourceFilePath: String = {
-            if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                return documentsDirectory.appendingPathComponent("source-sales.csv").path
-            } else {
-                return "/Users/e2mq173/Projects/dataframes/source-sales.csv"
-            }
-        }()
-        
-        // For Ballantyne it's 6; here we force an offset value of 0.
-        let offsetValue = 0
-        
-        // Process integration for each month over the years 2024 to 2025.
-        for year in 2024...2025 {
-            for month in 1...12 {
-                let formattedMonth = String(format: "%02d", month)
-                let strProcessDate = "\(year)\(formattedMonth)"
-                let fileURL = URL(fileURLWithPath: sourceFilePath)
-                
-                // Call your asynchronous integration function.
-                await SA01Integration.run(fileURL: fileURL,
-                                          strProcessDate: strProcessDate,
-                                          fiscalOffset: offsetValue)
-            }
-        }
-        
-        statusMessage = "Integration completed."
+    func updateNSViewController(_ nsViewController: ViewController, context: Context) {
+        // Update the view controller if needed.
     }
 }
 
+// MARK: - AppDelegate
+
+// Create an AppDelegate to ensure the app quits when the last window is closed.
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
+    }
+}
+
+
+// MARK: - Main App
+
 @main
 struct KiraaSalesAnalyticsApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
     var body: some Scene {
         WindowGroup {
             ContentView()
