@@ -15,7 +15,7 @@ struct BudgetVolumeThisFinancialYear {
             "MeasureType": "budget"
         ],
         
-            "volume_this_finyear_current_ytd_budget_volume": [
+            "volume_this_finyear_current_fytd_budget_volume": [
                 "FieldType": "volume",
                 "YearType": "thisfinyear",
                 "TimePeriod": "currentfinancialytd",

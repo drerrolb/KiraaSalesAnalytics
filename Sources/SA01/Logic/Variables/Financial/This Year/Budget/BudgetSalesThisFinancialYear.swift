@@ -15,7 +15,7 @@ struct BudgetSalesThisFinancialYear {
             "MeasureType": "budget"
         ],
         
-        "sales_this_finyear_current_ytd_budget_value": [
+        "sales_this_finyear_current_fytd_budget_value": [
             "FieldType": "sales",
             "YearType": "thisfinyear",
             "TimePeriod": "currentfinancialytd",

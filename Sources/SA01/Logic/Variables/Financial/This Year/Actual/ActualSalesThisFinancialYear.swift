@@ -4,7 +4,7 @@
 //
 //  Created by Errol Brandt on 1/3/2025.
 //
-
+//sales_this_finyear_current_fytd_actual_value
 struct ActualSalesThisFinancialYear {
     static let dictionary: [String: [String: String]] = [
     
@@ -15,7 +15,7 @@ struct ActualSalesThisFinancialYear {
             "MeasureType": "actual"
         ],
         
-        "sales_this_finyear_current_ytd_actual_value": [
+        "sales_this_finyear_current_fytd_actual_value": [
             "FieldType": "sales",
             "YearType": "thisfinyear",
             "TimePeriod": "currentfinancialytd",

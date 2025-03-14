@@ -15,7 +15,7 @@ struct ActualMarginThisFinancialYear {
             "MeasureType": "actual"
         ],
         
-        "margin_this_finyear_current_ytd_actual_value": [
+        "margin_this_finyear_current_fytd_actual_value": [
             "FieldType": "margin",
             "YearType": "thisfinyear",
             "TimePeriod": "currentfinancialytd",

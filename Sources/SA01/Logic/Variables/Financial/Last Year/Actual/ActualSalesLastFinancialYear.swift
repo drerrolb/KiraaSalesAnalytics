@@ -24,6 +24,13 @@ struct ActualSalesLastFinancialYear {
             "TimePeriod": "currentfinancialperiod",
             "MeasureType": "actual"
         ],
+        
+        "sales_last_finyear_current_ytd_actual_value": [
+            "FieldType": "sales",
+            "YearType": "lastfinyear",
+            "TimePeriod": "currentfinancialperiod",
+            "MeasureType": "actual"
+        ],
     
         // Periods (P01 - P12)
         "sales_last_finyear_01_period_actual_value": [

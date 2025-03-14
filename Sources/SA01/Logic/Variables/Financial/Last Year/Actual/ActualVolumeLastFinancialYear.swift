@@ -26,6 +26,14 @@ struct ActualVolumeLastFinancialYear {
         ],
     
         // Periods (P01 - P12)
+        "volume_last_finyear_current_fytd_actual_volume": [
+            "FieldType": "volume",
+            "YearType": "lastfinyear",
+            "TimePeriod": "currentfinancialperiod",
+            "MeasureType": "actual"
+        ],
+    
+        // Periods (P01 - P12)
         "volume_last_finyear_current_period_actual_volume": [
             "FieldType": "volume",
             "YearType": "lastfinyear",
@@ -33,6 +41,7 @@ struct ActualVolumeLastFinancialYear {
             "MeasureType": "actual"
         ],
     
+        
         
         // Periods (P01 - P12)
         "volume_last_finyear_01_period_actual_volume": [

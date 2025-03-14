@@ -15,7 +15,7 @@ struct ActualVolumeThisFinancialYear {
             "MeasureType": "actual"
         ],
         
-        "volume_this_finyear_current_ytd_actual_volume": [
+        "volume_this_finyear_current_fytd_actual_volume": [
             "FieldType": "volume",
             "YearType": "thisfinyear",
             "TimePeriod": "currentfinancialytd",

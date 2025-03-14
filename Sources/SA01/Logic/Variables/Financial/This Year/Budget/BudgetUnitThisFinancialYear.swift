@@ -15,7 +15,7 @@ struct BudgetUnitThisFinancialYear {
             "MeasureType": "budget"
         ],
         
-        "unit_this_finyear_current_ytd_budget_unit": [
+        "unit_this_finyear_current_fytd_budget_unit": [
             "FieldType": "unit",
             "YearType": "thisfinyear",
             "TimePeriod": "currentfinancialytd",

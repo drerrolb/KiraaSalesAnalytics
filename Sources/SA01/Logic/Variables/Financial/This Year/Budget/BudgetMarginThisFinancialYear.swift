@@ -16,7 +16,7 @@ struct BudgetMarginThisFinancialYear {
             "MeasureType": "budget"
         ],
         
-        "margin_this_finyear_current_ytd_budget_value": [
+        "margin_this_finyear_current_fytd_budget_value": [
             "FieldType": "margin",
             "YearType": "thisfinyear",
             "TimePeriod": "currentfinancialytd",
