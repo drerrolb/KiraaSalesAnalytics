@@ -8,37 +8,27 @@
 import Foundation
 import SwiftUI
 
-
 struct VariableDetailView: View {
     let variableKey: String
     let attributes: [String: String]
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(variableKey)
-                .font(.title)
-                .bold()
-                .padding(.top, 10)
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Details for \(variableKey)")
+                .font(.largeTitle)
+                .padding(.top)
             
-            Divider()
-            
-            Form {
-                // Show each attribute in a row: attributeKey → attributeValue
-                ForEach(attributes.keys.sorted(), id: \.self) { attrKey in
+            List {
+                ForEach(attributes.keys.sorted(), id: \.self) { key in
                     HStack {
-                        Text(attrKey)
-                            .fontWeight(.semibold)
+                        Text(key)
                         Spacer()
-                        Text(attributes[attrKey] ?? "")
-                            .foregroundColor(.secondary)
+                        Text(attributes[key] ?? "")
                     }
                 }
             }
-            .padding(.top, 5)
-            
-            Spacer()
         }
-        .padding([.leading, .trailing], 20)
-        .navigationTitle(variableKey)
+        .padding()
+        .navigationTitle("Variable Details")
     }
 }

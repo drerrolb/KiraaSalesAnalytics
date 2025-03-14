@@ -13,13 +13,13 @@ func openIntegrationWindow() {
     )
     newWindow.center()
     newWindow.title = "Integration"
-    newWindow.contentView = NSHostingView(rootView: IntegrationView())
+    newWindow.contentView = NSHostingView(rootView: IntegrationContentView())
     newWindow.makeKeyAndOrderFront(nil)
     print("IntegrationView window opened.")
 }
 
 // MARK: - IntegrationView SwiftUI definition
-struct IntegrationView: View {
+struct zzzzIntegrationContentView: View {
     @State private var statusMessage = "Ready"
     
     var body: some View {
