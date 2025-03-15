@@ -2,14 +2,28 @@ import Foundation
 import SwiftUI
 import TabularData
 
+// Define a custom key for grouping that conforms to Hashable.
+struct GroupKey: Hashable, Comparable {
+    let date: String
+    let measure: String
+    
+    static func < (lhs: GroupKey, rhs: GroupKey) -> Bool {
+        if lhs.date != rhs.date {
+            return lhs.date < rhs.date
+        }
+        return lhs.measure < rhs.measure
+    }
+}
+
 @MainActor
 final class SourceTableViewModel: ObservableObject {
     @Published var dataFrame: DataFrame = DataFrame()
     @Published var rowsCache: [DataFrame.Row] = []
+    @Published var aggregatedDataFrame: DataFrame = DataFrame()
     @Published var isLoaded: Bool = false
     let pageSize: Int = 100
-    
-    // Computed property for column names.
+
+    // Computed property for column names of the detailed view.
     var columnNames: [String] {
         dataFrame.columns.map { $0.name }
     }
@@ -37,10 +51,46 @@ final class SourceTableViewModel: ObservableObject {
                 return
             }
             
-            // Update properties on the main actor after the view has been laid out.
+            // Cache all rows.
+            let dfRows = Array(df.rows)
+            
+            // Compute the aggregated DataFrame.
+            // Group by SA01DATE and SA01MEASURE, summing SA01VALUE.
+            var groups: [GroupKey: Double] = [:]
+            for row in dfRows {
+                // Force cast SA01DATE to a string.
+                let date = String(describing: row["SA01DATE"] ?? "")
+                let measure = row["SA01MEASURE"] as? String ?? ""
+                let key = GroupKey(date: date, measure: measure)
+                let value: Double
+                if let v = row["SA01VALUE"] as? Double {
+                    value = v
+                } else if let vStr = row["SA01VALUE"] as? String, let v = Double(vStr) {
+                    value = v
+                } else {
+                    value = 0.0
+                }
+                groups[key, default: 0.0] += value
+            }
+            
+            // Sort the keys for a deterministic order.
+            let sortedKeys = groups.keys.sorted()
+            let aggregatedDates = sortedKeys.map { $0.date }
+            let aggregatedMeasures = sortedKeys.map { $0.measure }
+            // Cast the aggregated sums to integers.
+            let aggregatedValues = sortedKeys.map { Int(groups[$0]!) }
+            
+            let aggregatedDF = DataFrame(columns: [
+                Column(name: "SA01DATE", contents: aggregatedDates).eraseToAnyColumn(),
+                Column(name: "SA01MEASURE", contents: aggregatedMeasures).eraseToAnyColumn(),
+                Column(name: "SA01VALUE", contents: aggregatedValues).eraseToAnyColumn()
+            ])
+            
+            // Update the model on the main thread.
             await MainActor.run {
                 self.dataFrame = df
-                self.rowsCache = Array(df.rows)
+                self.rowsCache = dfRows
+                self.aggregatedDataFrame = aggregatedDF
                 self.isLoaded = true
             }
         } catch {
@@ -59,6 +109,7 @@ final class SourceTableViewModel: ObservableObject {
     }
 }
 
+/// Detailed (paginated) table view for the CSV data.
 struct SourceTableView: View {
     @ObservedObject var viewModel: SourceTableViewModel
     let currentPage: Int
@@ -101,9 +152,63 @@ struct SourceTableView: View {
     }
 }
 
+/// Aggregated table view showing grouped data.
+struct SourceAggregatedTableView: View {
+    let aggregatedDataFrame: DataFrame
+    
+    var columnNames: [String] {
+         aggregatedDataFrame.columns.map { $0.name }
+    }
+    
+    var body: some View {
+        ScrollView([.vertical, .horizontal]) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Header row with columns twice as wide.
+                HStack(spacing: 0) {
+                    ForEach(columnNames, id: \.self) { colName in
+                        Text(colName)
+                            .bold()
+                            .frame(width: 160, alignment: .leading)
+                            .padding(5)
+                            .background(Color.gray.opacity(0.2))
+                            .border(Color.gray, width: 0.5)
+                    }
+                }
+                // Data rows.
+                ForEach(Array(aggregatedDataFrame.rows.enumerated()), id: \.offset) { rowIndex, row in
+                    HStack(spacing: 0) {
+                        ForEach(columnNames, id: \.self) { colName in
+                            // If this is the SA01VALUE column, display the integer value.
+                            if colName == "SA01VALUE" {
+                                Text("\(row[colName] ?? 0)")
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                                    .frame(width: 160, alignment: .leading)
+                                    .padding(5)
+                                    .border(Color.gray.opacity(0.5), width: 0.5)
+                            } else {
+                                Text("\(row[colName] ?? "")")
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                                    .frame(width: 160, alignment: .leading)
+                                    .padding(5)
+                                    .border(Color.gray.opacity(0.5), width: 0.5)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+/// The main content view including a segmented control to toggle between detailed and aggregated views.
 struct SourceContentView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var currentPage: Int = 0
+    // 0 = Detailed, 1 = Aggregated
+    @State private var selectedView: Int = 0
     @StateObject private var viewModel = SourceTableViewModel()
     
     var body: some View {
@@ -122,26 +227,45 @@ struct SourceContentView: View {
             .padding([.horizontal, .top])
             Divider()
             
-            // Main content area displaying the grid.
-            SourceTableView(viewModel: viewModel, currentPage: currentPage)
-            
-            // Pagination controls.
-            HStack {
-                Button("Previous") {
-                    if currentPage > 0 { currentPage -= 1 }
-                }
-                .disabled(currentPage == 0)
-                
-                Spacer()
-                Text("Page \(currentPage + 1) of \(max(viewModel.totalPages, 1))")
-                Spacer()
-                
-                Button("Next") {
-                    if currentPage < viewModel.totalPages - 1 { currentPage += 1 }
-                }
-                .disabled(currentPage >= viewModel.totalPages - 1)
+            // Segmented control for switching views.
+            Picker("View", selection: $selectedView) {
+                Text("Detailed").tag(0)
+                Text("Aggregated").tag(1)
             }
+            .pickerStyle(.segmented)
             .padding()
+            
+            // Main content area: show one of the two table views.
+            if selectedView == 0 {
+                SourceTableView(viewModel: viewModel, currentPage: currentPage)
+            } else {
+                if viewModel.isLoaded {
+                    SourceAggregatedTableView(aggregatedDataFrame: viewModel.aggregatedDataFrame)
+                } else {
+                    ProgressView("Loading CSV…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            
+            // Show pagination controls only in the detailed view.
+            if selectedView == 0 {
+                HStack {
+                    Button("Previous") {
+                        if currentPage > 0 { currentPage -= 1 }
+                    }
+                    .disabled(currentPage == 0)
+                    
+                    Spacer()
+                    Text("Page \(currentPage + 1) of \(max(viewModel.totalPages, 1))")
+                    Spacer()
+                    
+                    Button("Next") {
+                        if currentPage < viewModel.totalPages - 1 { currentPage += 1 }
+                    }
+                    .disabled(currentPage >= viewModel.totalPages - 1)
+                }
+                .padding()
+            }
         }
         .frame(minWidth: 600, minHeight: 400)
         .padding()
