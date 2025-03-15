@@ -21,7 +21,7 @@ struct IntegrationContentView: View {
     @State private var filePath: String = "/Users/e2mq173/Documents/source-sales.csv"
     @State private var startDate: Date = Date()  // Defaults to current date.
     @State private var endDate: Date = Date()    // Defaults to current date.
-    @State private var fiscalOffset: Int = 0
+    @State private var fiscalOffset: Int = 6
     
     // UI feedback.
     @State private var isRunning = false
@@ -85,12 +85,16 @@ struct IntegrationContentView: View {
             }
             .padding(.horizontal)
             
-            // Fiscal Offset input.
+            // Fiscal Offset input as a dropdown.
             HStack {
                 Text("Fiscal Offset:")
                     .frame(width: 120, alignment: .leading)
-                TextField("Fiscal Offset", value: $fiscalOffset, formatter: NumberFormatter())
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                Picker("Fiscal Offset", selection: $fiscalOffset) {
+                    ForEach(0...11, id: \.self) { offset in
+                        Text("\(offset)").tag(offset)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
             }
             .padding(.horizontal)
             

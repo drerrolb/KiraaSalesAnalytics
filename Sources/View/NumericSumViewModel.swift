@@ -111,7 +111,9 @@ final class NumericSumViewModel: ObservableObject {
     
     /// Saves the computed sums to disk as JSON.
     private func saveSums() {
-        let entries = self.sums.map { SumEntry(columnName: $0.columnName, sum: $0.sum) }
+        let entries = self.sums
+            .filter { $0.sum != 0 }
+            .map { SumEntry(columnName: $0.columnName, sum: $0.sum) }
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(entries)

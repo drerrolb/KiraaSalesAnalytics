@@ -89,6 +89,8 @@ func generateAnalyticalDataFrame(updatedDataFrame: DataFrame,
         //----------------------------------------------------------------------------
         // For each row, check if it meets the measure+field+timePeriod+year criteria
         //----------------------------------------------------------------------------
+        
+        
         for rowIndex in 0..<rowCount {
             
             let validTimePeriodValues = validTimePeriods[rowIndex].1
@@ -119,12 +121,26 @@ func generateAnalyticalDataFrame(updatedDataFrame: DataFrame,
                 multiplierField   = 0.0
             }
             
+            
+            //----------------------------------------------------------------------------
+            // special overrides
+            //----------------------------------------------------------------------------
+            if strMeasureType == "Actual" && strTimePeriod == "01" { print("actual 01") }
+            if strMeasureType == "Actual" && strTimePeriod == "02" { print("actual 02") }
+            if strMeasureType == "Actual" && strTimePeriod == "03" { print("actual 03") }
+            
+            
+            //----------------------------------------------------------------------------
+            // BINGO MAGIC HAPPENS
+            //----------------------------------------------------------------------------
+            
             // Final condition: combine all multipliers
             let evaluationResult = multiplierTimePeriod
                                 * multiplierYear
                                 * multiplierMeasure
                                 * multiplierField
             
+
             // If everything matches (evaluationResult == 1.0), store the value along with all details
             if evaluationResult == 1.0 {
                 let eval = Evaluation(rowIndex: rowIndex,

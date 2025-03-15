@@ -51,7 +51,7 @@ func SA01Chunk(dataframe: DataFrame,
     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
     
     let totalRows = safeRows.count
-    let chunkSize = 10_000
+    let chunkSize = 5_000
     let numberOfChunks = (totalRows + chunkSize - 1) / chunkSize
     
     print(String(format: "Total rows: %8d, Chunk size: %8d, Number of chunks: %8d",

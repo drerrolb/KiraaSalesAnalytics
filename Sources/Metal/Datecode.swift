@@ -30,46 +30,96 @@ func decodeYear(_ binary: String) -> [String: Bool] {
 
 /// Decodes all time period flags (everything except year flags) from a 64-bit binary string.
 func decodeTimeperiod(_ binary: String) -> [String: Bool] {
+    
+    // retrieve the binary array
     let chars = Array(binary)
+    var flags = [String: Bool]()
+    
+    // check the buffer is 64
     guard chars.count >= 64 else {
         fatalError("Binary string is too short. Expected at least 64 characters, got \(chars.count).")
     }
+
     
-    var flags = [String: Bool]()
-    
+    // =========================================================================================
+    // CALENDAR MONTHS
     // Calendar Months (indices 5..16)
+    // =========================================================================================
+
     let calMonthLabels = [
         "januarymonth", "februarymonth", "marchmonth", "aprilmonth", "maymonth", "junemonth",
         "julymonth", "augustmonth", "septembermonth", "octobermonth", "novembermonth", "decembermonth"
     ]
-    for i in 0..<12 { flags[calMonthLabels[i]] = (chars[5 + i] == "1") }
     
-    // Calendar YTD (indices 17..28)
     let calYTDLabels = [
         "januaryytd", "februaryytd", "marchytd", "aprilytd", "mayytd", "juneytd",
         "julyytd", "augustytd", "septemberytd", "octoberytd", "novemberytd", "decemberytd"
     ]
-    for i in 0..<12 { flags[calYTDLabels[i]] = (chars[17 + i] == "1") }
+    
+    
+    // populate the month set
+    for i in 0..<12 { flags[calMonthLabels[i]] = (chars[5 + i] == "1") }
+    
+    // populate the year-to-date set so that if the current month is true,
+    // then all subsequent months will also be true
+    for i in 0..<12 {
+        if flags[calMonthLabels[i]] == true {
+            for j in i..<12 {
+                flags[calYTDLabels[j]] = true
+                //print("\(calYTDLabels[j]) set to true")
+            }
+        }
+    }
+    
+    // =========================================================================================
+    // ROLLING PERIODS CURRENTLY NOT USED
+    // =========================================================================================
+
+    // Calendar YTD (indices 17..28)
+
+    //for i in 0..<12 { flags[calYTDLabels[i]] = (chars[17 + i] == "1") }
     
     // Calendar Rolling (indices 29..31)
     flags["rollingcalendarR03"] = (chars[29] == "1")
     flags["rollingcalendarR06"] = (chars[30] == "1")
     flags["rollingcalendarR12"] = (chars[31] == "1")
     
+    
+    // =========================================================================================
+    // FINANCIAL PERIODS
     // Financial Period (indices 37..48)
+    // Financial YTD (indices 49..60)
+    // =========================================================================================
+
     let finPeriodLabels = [
         "p01", "p02", "p03", "p04", "p05", "p06",
         "p07", "p08", "p09", "p10", "p11", "p12"
     ]
-    for i in 0..<12 { flags[finPeriodLabels[i]] = (chars[37 + i] == "1") }
     
-    // Financial YTD (indices 49..60)
     let finYTDLabels = [
         "p01ytd", "p02ytd", "p03ytd", "p04ytd", "p05ytd", "p06ytd",
         "p07ytd", "p08ytd", "p09ytd", "p10ytd", "p11ytd", "p12ytd"
     ]
-    for i in 0..<12 { flags[finYTDLabels[i]] = (chars[49 + i] == "1") }
     
+    // populate the period set
+    for i in 0..<12 { flags[finPeriodLabels[i]] = (chars[37 + i] == "1") }
+    
+    // populate the period fytd set so that if a period is true,
+    // then that period and all subsequent periods will also be true
+    for i in 0..<12 {
+        if flags[finPeriodLabels[i]] == true {
+            for j in i..<12 {
+                flags[finYTDLabels[j]] = true
+                //print("\(finYTDLabels[j]) set to true")
+            }
+        }
+    }
+
+    // =========================================================================================
+    // ROLLING PERIODS CURRENTLY NOT USED
+    // =========================================================================================
+
+
     // Financial Rolling (indices 61..63)
     flags["rollingfinancialR03"] = (chars[61] == "1")
     flags["rollingfinancialR06"] = (chars[62] == "1")
@@ -88,11 +138,6 @@ func decodeTimeperiod(_ binary: String) -> [String: Bool] {
 ///   - financialOffset: Financial offset for date processing.
 ///   - decode: A closure to decode a 65-character C-string into flag dictionary.
 /// - Returns: Array of tuples containing the date code and an array of flag names that were set.
-///
-///
-///
-///
-///
 
 private func processDateCodesWithMetal(
     dateCodes: [UInt32],
@@ -108,37 +153,54 @@ private func processDateCodesWithMetal(
         fatalError("Could not find default.metallib in Bundle.module")
     }
     
+    // =========================================================================================
+    // INIIALIZE METAL LIBRARY
+    // =========================================================================================
+
+    let metalLibURL = URL(fileURLWithPath: metalLibPath)
+
     let library: MTLLibrary
-    do {
-        library = try device.makeLibrary(filepath: metalLibPath)
-    } catch {
-        fatalError("Failed to create Metal library from default.metallib: \(error)")
-    }
+    
+    do      { library = try device.makeLibrary(URL: metalLibURL) }
+    catch   { fatalError("Failed to create Metal library from default.metallib: \(error)") }
+    
+    // =========================================================================================
+    // process date code
+    // =========================================================================================
     
     guard let function = library.makeFunction(name: "processDateCode") else {
         fatalError("Failed to find Metal function 'processDateCode'")
     }
     
     let pipelineState: MTLComputePipelineState
-    do {
-        pipelineState = try device.makeComputePipelineState(function: function)
-    } catch {
-        fatalError("Failed to create compute pipeline state: \(error)")
-    }
     
-    // 2. Create input buffers
+    do      { pipelineState = try device.makeComputePipelineState(function: function) }
+    catch   { fatalError("Failed to create compute pipeline state: \(error)") }
+    
+    // =========================================================================================
+    //  Input Buffers
+    //  1. Source  Date Buffer
+    //  2. Process Date Buffer
+    //  3. Offset  Buffer
+    //  4. Calendar Processing Buffer
+    //  5. Financial Processing Buffer
+    // =========================================================================================
+    
+    // input buffers for date
     let dateBuffer = device.makeBuffer(
         bytes: dateCodes,
         length: dateCodes.count * MemoryLayout<UInt32>.size,
         options: []
     )!
     
+    // process buffers for date
     let processDateBuffer = device.makeBuffer(
         bytes: [processDate],
         length: MemoryLayout<UInt32>.size,
         options: []
     )!
     
+    // financial offset buffer
     let financialOffsetBuffer = device.makeBuffer(
         bytes: [financialOffset],
         length: MemoryLayout<UInt32>.size,
@@ -147,13 +209,14 @@ private func processDateCodesWithMetal(
     
     // 3. Buffers for GPU‐calculated “processing dates”
     var calendarProcessingDate: UInt32 = 0
-    var financialProcessingDate: UInt32 = 0
-    
+
     let calendarProcessingDateBuffer = device.makeBuffer(
         bytes: &calendarProcessingDate,
         length: MemoryLayout<UInt32>.size,
         options: .storageModeShared
     )!
+    
+    var financialProcessingDate: UInt32 = 0
     
     let financialProcessingDateBuffer = device.makeBuffer(
         bytes: &financialProcessingDate,
@@ -161,16 +224,28 @@ private func processDateCodesWithMetal(
         options: .storageModeShared
     )!
     
+    // =========================================================================================
+    //  Output Buffer
+    // =========================================================================================
+    
     // 4. Create the output buffer (65 CChars per date)
     let numCharsPerDate = 65
     let outputSize = dateCodes.count * numCharsPerDate * MemoryLayout<CChar>.size
     let outputBuffer = device.makeBuffer(length: outputSize, options: .storageModeShared)!
     
-    // 5. Set up and dispatch the compute kernel
+    // =========================================================================================
+    //  Command Encoder
+    // =========================================================================================
+    
     let commandBuffer = commandQueue.makeCommandBuffer()!
     let commandEncoder = commandBuffer.makeComputeCommandEncoder()!
+    let threads = MTLSize(width: dateCodes.count, height: 1, depth: 1)
+    let threadsPerGroup = MTLSize(width: 1, height: 1, depth: 1)
     
+    // pipeline
     commandEncoder.setComputePipelineState(pipelineState)
+
+    // buffer
     commandEncoder.setBuffer(dateBuffer, offset: 0, index: 0)
     commandEncoder.setBuffer(outputBuffer, offset: 0, index: 1)
     commandEncoder.setBuffer(processDateBuffer, offset: 0, index: 2)
@@ -178,133 +253,160 @@ private func processDateCodesWithMetal(
     commandEncoder.setBuffer(calendarProcessingDateBuffer, offset: 0, index: 4)
     commandEncoder.setBuffer(financialProcessingDateBuffer, offset: 0, index: 5)
     
-    let threads = MTLSize(width: dateCodes.count, height: 1, depth: 1)
-    let threadsPerGroup = MTLSize(width: 1, height: 1, depth: 1)
+    // threads
     commandEncoder.dispatchThreads(threads, threadsPerThreadgroup: threadsPerGroup)
     
+    // end encoding
     commandEncoder.endEncoding()
+    
+    // execute
     commandBuffer.commit()
+    
+    // wait
     commandBuffer.waitUntilCompleted()
     
-    // 6. (Optional) Decode output flag strings for debugging
+    // =========================================================================================
+    // Decoding Strings
+    // =========================================================================================
+    
     let outputPointer = outputBuffer.contents().bindMemory(to: CChar.self, capacity: outputSize)
+    
     let monthNames = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ]
+    
     for i in 0..<min(10, dateCodes.count) {
+        
         let offset = i * numCharsPerDate
         let binaryString = String(cString: outputPointer.advanced(by: offset))
         
         let processYear  = processDate / 10000
         let processMonth = (processDate / 100) % 100
         let processDay   = processDate % 100
+        
         let formattedProcessDate = "\(monthNames[Int(processMonth) - 1]) \(processDay), \(processYear)"
         
-        _ = decode(binaryString)
-        // Optional: print or log formattedProcessDate and decoded flags
+        //print ("\(i): \(binaryString)")
+
     }
     
-    // 7. Determine process month keys and add current keys based on decoded flags.
+    // =========================================================================================
+    // CURRENT PERIOD DETERMINATIONS
+    // =========================================================================================
+    
+    // strip out the months
     let processMonth = (processDate / 100) % 100
-    // Calendar month keys from indices 5..16 in decodeTimeperiod:
+
+    // look up the current Calendar Month Key
     let calendarMonthKeys = [
-        "januarymonth", "februarymonth", "marchmonth", "aprilmonth", "maymonth", "junemonth",
-        "julymonth", "augustmonth", "septembermonth", "octobermonth", "novembermonth", "decembermonth"
+        "januarymonth", "februarymonth", "marchmonth",
+        "aprilmonth", "maymonth", "junemonth",
+        "julymonth", "augustmonth", "septembermonth",
+        "octobermonth", "novembermonth", "decembermonth"
     ]
+    
     let currentCalendarMonthKey = calendarMonthKeys[Int(processMonth) - 1]
+    
+    //print ("Current Calendar Month key is \(currentCalendarMonthKey)")
     
     // Calendar YTD keys from indices 17..28:
     let calendarYTDKeys = [
-        "januaryytd", "februaryytd", "marchytd", "aprilytd", "mayytd", "juneytd",
-        "julyytd", "augustytd", "septemberytd", "octoberytd", "novemberytd", "decemberytd"
+        "januaryytd", "februaryytd", "marchytd",
+        "aprilytd", "mayytd", "juneytd",
+        "julyytd", "augustytd", "septemberytd", 
+        "octoberytd", "novemberytd", "decemberytd"
     ]
+    
     let currentCalendarYTDKey = calendarYTDKeys[Int(processMonth) - 1]
+    
+    //print ("Current Calendar YTD key is \(currentCalendarYTDKey)")
     
     // Financial period keys from indices 37..48:
     let financialPeriodKeys = [
             "p01", "p02", "p03", "p04", "p05", "p06",
             "p07", "p08", "p09", "p10", "p11", "p12"
     ]
+    
     let currentFinancialPeriodKey = financialPeriodKeys[Int(processMonth) - 1]
+    
+    //print ("Current Financial Period is key is \(currentFinancialPeriodKey)")
+    
+    // Financial FYTD
+    
+    let financialYTDKeys = [
+        "p01ytd", "p02ytd", "p03ytd", "p04ytd", "p05ytd", "p06ytd",
+        "p07ytd", "p08ytd", "p09ytd", "p10ytd", "p11ytd", "p12ytd"
+    ]
+    
+    let currentFinancialYTDKey = financialYTDKeys[Int(processMonth) - 1]
+    
+    //print ("Current Financial Period is key is \(currentFinancialYTDKey)")
+    
     
     var validMembersForDates = [(UInt32, [String])]()
     
+    // =========================================================================================
+    // CURRENT PERIOD DETERMINATIONS
+    // =========================================================================================
     
     for i in 0..<dateCodes.count {
+        
+        // who are we working with
+        //print("Processing date code \(dateCodes[i])")
+        
         let offset = i * numCharsPerDate
         let binaryString = String(cString: outputPointer.advanced(by: offset))
         let decodedFlags = decode(binaryString)
         var validMembers = decodedFlags.filter { $0.value }.map { $0.key }
         
-        // Add new current keys based on the process month:
+        // =========================================================================================
+        // CALENDAR MONTH
+        // CALENDAR YTD
+        // =========================================================================================
+        
+        
         if let isCurrentCalMonth = decodedFlags[currentCalendarMonthKey], isCurrentCalMonth {
             validMembers.append("currentcalendarmonth")
+            //print ("Appended Current Calendar Month")
         }
         
-        // For currentcalendarytd, check all YTD flags from January up through the process month.
-        var isCurrentCalYTD = false
-        for m in 0..<Int(processMonth) {
-            let key = calendarYTDKeys[m]
-            if let flag = decodedFlags[key], flag {
-                isCurrentCalYTD = true
-                break
-            }
-        }
-        if isCurrentCalYTD {
+        
+        if let isCurrentCalYTD = decodedFlags[currentCalendarYTDKey], isCurrentCalYTD {
             validMembers.append("currentcalendarytd")
+            //print ("Appended Current Calendar YTD")
         }
         
-        // For current calendar YTG (year-to-go): if any calendar YTD flags from the current month onward are set.
-        var isCurrentCalYTG = false
-        for m in Int(processMonth)..<12 {
-            let key = calendarYTDKeys[m]
-            if let flag = decodedFlags[key], flag {
-                isCurrentCalYTG = true
-                break
-            }
+      
+        // =========================================================================================
+        // FISCAL PERIOD
+        // FISCAL FYTD
+        // =========================================================================================
+        
+        if let isCurrentFinPeriod = decodedFlags[currentFinancialPeriodKey], isCurrentFinPeriod {
+            validMembers.append("currentfinancialperiod")
+            //print ("Appended Current Financial Period")
         }
         
-        
-        // For current financial YTD, check all financial YTD flags (p01ytd to p12ytd)
-       // from period 1 up through the process month.
-       var isCurrentFinYTD = false
-       let financialYTDKeys = [
-           "p01ytd", "p02ytd", "p03ytd", "p04ytd", "p05ytd", "p06ytd",
-           "p07ytd", "p08ytd", "p09ytd", "p10ytd", "p11ytd", "p12ytd"
-       ]
-       for m in 0..<Int(processMonth) {
-           let key = financialYTDKeys[m]
-           if let flag = decodedFlags[key], flag {
-               isCurrentFinYTD = true
-               break
-           }
-       }
-       if isCurrentFinYTD {
-           validMembers.append("currentfinancialytd")
-       }
+        // if the current YTD exist in the list of decoded flags
 
         
-        
-        
-        
-        if isCurrentCalYTG {
-            validMembers.append("currentcalendarytg")
+        if let isCurrentFinYTD = decodedFlags[currentFinancialYTDKey], isCurrentFinYTD {
+            validMembers.append("currentfinancialytd")
+            //print ("Appended Current Financial YTD")
         }
         
-        if let isCurrentFin = decodedFlags[currentFinancialPeriodKey], isCurrentFin {
-            validMembers.append("currentcalendarfy")
-        }
-        
-        // Check the current financial period flag and add "currentfinancialperiod" if set.
-          if let isCurrentFin = decodedFlags[currentFinancialPeriodKey], isCurrentFin {
-              validMembers.append("currentfinancialperiod")
-          }
+        // =========================================================================================
+        // CF
+        // =========================================================================================
     
-        
         if !validMembers.isEmpty {
             validMembersForDates.append((dateCodes[i], validMembers))
+            //print("Date code: \(dateCodes[i]), Valid Members: \(validMembers)")
         }
+        
+        //print ("\n")
+        
     }
     
     //print (validMembersForDates)
