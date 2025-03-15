@@ -1,55 +1,94 @@
 import SwiftUI
-import AppKit
+import Foundation
 
-/// 1) Mark the function as @MainActor so all NSWindow calls happen on the main thread.
-@MainActor
-func openIntegrationWindow() {
-    // Creating and configuring an NSWindow is main actor-isolated.
-    let newWindow = NSWindow(
-        contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
-        styleMask: [.titled, .closable, .resizable],
-        backing: .buffered,
-        defer: false
-    )
-    newWindow.center()
-    newWindow.title = "Integration"
-    newWindow.contentView = NSHostingView(rootView: IntegrationContentView())
-    newWindow.makeKeyAndOrderFront(nil)
-    print("IntegrationView window opened.")
-}
-
-// MARK: - IntegrationView SwiftUI definition
-struct zzzzIntegrationContentView: View {
-    @State private var statusMessage = "Ready"
+// MARK: - IntegrationContentView (Modal)
+struct IntegrationContentView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    // Sample defaults that the user can edit in the UI.
+    @State private var filePath: String = "/Users/e2mq173/Documents/source-sales.csv"
+    @State private var processDate: String = "202502"
+    @State private var fiscalOffset: Int = 0
+    
+    // State for controlling UI feedback.
+    @State private var isRunning = false
+    @State private var resultText = ""
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             Text("Integration")
                 .font(.title)
-            Text(statusMessage)
+            
+            // Labeled input for File Path.
+            HStack {
+                Text("File Path:")
+                    .frame(width: 120, alignment: .leading)
+                TextField("File Path", text: $filePath)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            .padding(.horizontal)
+            
+            // Labeled input for Process Date.
+            HStack {
+                Text("Process Date:")
+                    .frame(width: 120, alignment: .leading)
+                TextField("YYYYMMDD", text: $processDate)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            .padding(.horizontal)
+            
+            // Labeled input for Fiscal Offset.
+            HStack {
+                Text("Fiscal Offset:")
+                    .frame(width: 120, alignment: .leading)
+                TextField("Fiscal Offset", value: $fiscalOffset, formatter: NumberFormatter())
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            .padding(.horizontal)
+            
+            // Run button.
             Button("Run Integration") {
-                print("Run Integration button tapped.")
+                isRunning = true
+                resultText = "Running integration..."
+                
                 Task {
                     await runIntegration()
                 }
             }
+            .disabled(isRunning)
+            .buttonStyle(.borderedProminent)
+            
+            // Display any output or results.
+            if !resultText.isEmpty {
+                Text(resultText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+            }
+            
+            Spacer()
+            
+            // Close button.
+            Button("Close") {
+                dismiss()
+            }
             .buttonStyle(.borderedProminent)
         }
+        .frame(width: 500, height: 400)
         .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            print("IntegrationView appeared with status: \(statusMessage)")
-        }
     }
     
-    // This function simulates your asynchronous integration work.
-    @MainActor
+    // MARK: - Integration Runner
     func runIntegration() async {
-        statusMessage = "Running integration..."
-        print("Starting integration process...")
-        // Simulate some asynchronous work.
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        statusMessage = "Integration completed."
-        print("Integration process completed. Status updated to: \(statusMessage)")
+        defer { isRunning = false }
+        
+        let fileURL = URL(fileURLWithPath: filePath)
+        
+        // Call your async integration function.
+        await SA01Integration.run(fileURL: fileURL,
+                                  strProcessDate: processDate,
+                                  fiscalOffset: fiscalOffset)
+        
+        // Update the UI with a result message.
+        resultText = "Integration complete. Check logs for details."
     }
 }
