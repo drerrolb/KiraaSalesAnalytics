@@ -1,9 +1,7 @@
 import SwiftUI
 import AppKit
 import Foundation
-import SwiftUI
 import TabularData
-
 
 // MARK: - Sidebar Items
 enum SidebarItem: String, CaseIterable, Identifiable {
@@ -11,6 +9,8 @@ enum SidebarItem: String, CaseIterable, Identifiable {
     case variables = "Variables Browser"
     case sourceViewer = "Source Viewer"
     case configuration = "Configuration"
+    // New menu option for numeric column sums.
+    case numericSum = "Numeric Sum"
     
     var id: String { rawValue }
 }
@@ -44,6 +44,8 @@ struct MainContentView: View {
                 SourceContentView()
             case .configuration:
                 ConfigurationView()
+            case .numericSum:
+                NumericSumView()  // New view for numeric sum
             }
         }
     }
@@ -53,12 +55,6 @@ struct MainContentView: View {
         activeSheet = item
     }
 }
-
-
-
-
-
-
 
 
 // MARK: - Basic App

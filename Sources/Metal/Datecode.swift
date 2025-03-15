@@ -58,8 +58,8 @@ func decodeTimeperiod(_ binary: String) -> [String: Bool] {
     
     // Financial Period (indices 37..48)
     let finPeriodLabels = [
-        "p01period", "p02period", "p03period", "p04period", "p05period", "p06period",
-        "p07period", "p08period", "p09period", "p10period", "p11period", "p12period"
+        "p01", "p02", "p03", "p04", "p05", "p06",
+        "p07", "p08", "p09", "p10", "p11", "p12"
     ]
     for i in 0..<12 { flags[finPeriodLabels[i]] = (chars[37 + i] == "1") }
     
@@ -223,8 +223,8 @@ private func processDateCodesWithMetal(
     
     // Financial period keys from indices 37..48:
     let financialPeriodKeys = [
-        "p01period", "p02period", "p03period", "p04period", "p05period", "p06period",
-        "p07period", "p08period", "p09period", "p10period", "p11period", "p12period"
+            "p01", "p02", "p03", "p04", "p05", "p06",
+            "p07", "p08", "p09", "p10", "p11", "p12"
     ]
     let currentFinancialPeriodKey = financialPeriodKeys[Int(processMonth) - 1]
     

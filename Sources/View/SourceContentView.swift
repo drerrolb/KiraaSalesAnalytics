@@ -168,7 +168,8 @@ struct SourceAggregatedTableView: View {
                     ForEach(columnNames, id: \.self) { colName in
                         Text(colName)
                             .bold()
-                            .frame(width: 160, alignment: .leading)
+                            // Right align SA01VALUE header, left align others.
+                            .frame(width: 160, alignment: colName == "SA01VALUE" ? .trailing : .leading)
                             .padding(5)
                             .background(Color.gray.opacity(0.2))
                             .border(Color.gray, width: 0.5)
@@ -178,22 +179,13 @@ struct SourceAggregatedTableView: View {
                 ForEach(Array(aggregatedDataFrame.rows.enumerated()), id: \.offset) { rowIndex, row in
                     HStack(spacing: 0) {
                         ForEach(columnNames, id: \.self) { colName in
-                            // If this is the SA01VALUE column, display the integer value.
-                            if colName == "SA01VALUE" {
-                                Text("\(row[colName] ?? 0)")
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .frame(width: 160, alignment: .leading)
-                                    .padding(5)
-                                    .border(Color.gray.opacity(0.5), width: 0.5)
-                            } else {
-                                Text("\(row[colName] ?? "")")
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .frame(width: 160, alignment: .leading)
-                                    .padding(5)
-                                    .border(Color.gray.opacity(0.5), width: 0.5)
-                            }
+                            Text("\(row[colName] ?? (colName == "SA01VALUE" ? 0 : ""))")
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                // Right align SA01VALUE cells, left align others.
+                                .frame(width: 160, alignment: colName == "SA01VALUE" ? .trailing : .leading)
+                                .padding(5)
+                                .border(Color.gray.opacity(0.5), width: 0.5)
                         }
                     }
                 }
@@ -202,6 +194,7 @@ struct SourceAggregatedTableView: View {
         }
     }
 }
+
 
 /// The main content view including a segmented control to toggle between detailed and aggregated views.
 struct SourceContentView: View {
