@@ -1,13 +1,4 @@
-//
-//  SA01Integration.swift
-//  kiraa-sales-analytics
-//
-//  Created by Errol Brandt on 24/2/2025.
-//
-
-
 import Foundation
-
 
 public struct SA01Integration {
     public static func run(fileURL: URL, strProcessDate: String, fiscalOffset: Int) async {
@@ -21,24 +12,33 @@ public struct SA01Integration {
         ╚═════╝░╚═╝░░╚═╝░╚════╝░╚══════╝
         """
         
-        // Print welcome message and text art.
-        print("Welcome to Kiraa Sales Analytics!")
-        print("\n")
-        print(textArt)
-        print("\n")
+        // Log welcome message and text art.
+        await MainActor.run {
+            LoggerViewModel.shared.log("Welcome to Kiraa Sales Analytics!")
+            LoggerViewModel.shared.log("")
+            LoggerViewModel.shared.log(textArt)
+            LoggerViewModel.shared.log("")
+        }
         
         // Step 1: Validate the source file.
-        print("Step 1.0")
-        print("Validating that the CSV file is found at the specified location.")
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            LoggerManager.shared.logInfo("CSV file found at \(fileURL.path)")
-            print("> CSV file found at \(fileURL.path)")
-        } else {
-            LoggerManager.shared.logInfo("CSV file not found at \(fileURL.path)")
-            print("> CSV file not found at \(fileURL.path)")
+        await MainActor.run {
+            LoggerViewModel.shared.log("Step 1.0")
+            LoggerViewModel.shared.log("Validating that the CSV file is found at the specified location.")
         }
-        print("\n")
         
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            await MainActor.run {
+                LoggerViewModel.shared.log("> CSV file found at \(fileURL.path)")
+            }
+        } else {
+            await MainActor.run {
+                LoggerViewModel.shared.log("> CSV file not found at \(fileURL.path)")
+            }
+        }
+        
+        await MainActor.run {
+            LoggerViewModel.shared.log("")
+        }
         
         let parametersOutput = """
         Starting execution of Kiraa Sales Analytics Integration with the following parameters:
@@ -47,10 +47,10 @@ public struct SA01Integration {
         > Process Date:  \(strProcessDate)
         > Fiscal Offset: \(fiscalOffset)
         """
-        print(parametersOutput)
+        await MainActor.run {
+            LoggerViewModel.shared.log(parametersOutput)
+        }
         
-
-
         // Record the start time.
         let startTime = Date()
         
@@ -65,23 +65,20 @@ public struct SA01Integration {
             let executionTime = endTime.timeIntervalSince(startTime)
             let formattedTime = formatTimeInterval(executionTime)
             
-            LoggerManager.shared.logInfo("Execution completed successfully: \(finalMessage)")
-            
-            let finalMessage2 = "OK"
-            
-            printFinalBox(executionMessage: finalMessage2,
-                          executionTime: formattedTime,
-                          executionStatus: "Success")
+            await MainActor.run {
+                LoggerViewModel.shared.log("Execution completed successfully: \(finalMessage)")
+                LoggerViewModel.shared.log("Final Status: OK")
+                LoggerViewModel.shared.log("Execution Time: \(formattedTime)")
+            }
         } catch {
             let endTime = Date()
             let executionTime = endTime.timeIntervalSince(startTime)
             let formattedTime = formatTimeInterval(executionTime)
             
-            LoggerManager.shared.logError("Execution failed: \(error.localizedDescription)")
-            printFinalBox(executionMessage: error.localizedDescription,
-                          executionTime: formattedTime,
-                          executionStatus: "Error")
+            await MainActor.run {
+                LoggerViewModel.shared.log("Execution failed: \(error.localizedDescription)")
+                LoggerViewModel.shared.log("Execution Time: \(formattedTime)")
+            }
         }
     }
 }
-
