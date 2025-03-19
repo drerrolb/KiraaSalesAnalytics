@@ -8,7 +8,7 @@
 import Foundation
 import MongoSwiftSync
 
-public struct xxMongoDownloader {
+public struct MongoDownloader {
     public static func downloadDocuments() throws -> String {
         // Retrieve the MongoDB URL from the environment variable.
         guard let mongoUrl = ProcessInfo.processInfo.environment["MONGO_URL"] else {
