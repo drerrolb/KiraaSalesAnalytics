@@ -32,8 +32,17 @@ struct AllAnalyticsDictionaries {
         combined.merge(ActualMeetingThisCalendarYear.dictionary) { (_, new) in new }
         
         // ---------- CALENDAR: THIS YEAR / FORECAST ----------
-        combined.merge(UnlockedforecastSalesThisCalendarYear.dictionary) { (_, new) in new }
         combined.merge(LockedForecastSalesThisCalendarYear.dictionary) { (_, new) in new }
+        combined.merge(LockedForecastMarginThisCalendarYear.dictionary) { (_, new) in new }
+        combined.merge(LockedForecastUnitThisCalendarYear.dictionary) { (_, new) in new }
+        combined.merge(LockedForecastVolumeThisCalendarYear.dictionary) { (_, new) in new }
+        
+        
+        combined.merge(UnlockedForecastSalesThisCalendarYear.dictionary) { (_, new) in new }
+        combined.merge(UnlockedForecastMarginThisCalendarYear.dictionary) { (_, new) in new }
+        combined.merge(UnlockedForecastUnitThisCalendarYear.dictionary) { (_, new) in new }
+        combined.merge(UnlockedForecastVolumeThisCalendarYear.dictionary) { (_, new) in new }
+
         
         // ---------- CALENDAR: THIS YEAR / BUDGET ----------
         combined.merge(BudgetVolumeThisCalendarYear.dictionary) { (_, new) in new }
@@ -43,8 +52,10 @@ struct AllAnalyticsDictionaries {
         
         // ---------- CALENDAR: NEXT YEAR ----------
         // Merge next-year unlocked & locked forecast, budget
-        combined.merge(UnlockedforecastSalesNextCalendarYear.dictionary) { (_, new) in new }
+        combined.merge(UnlockedForecastSalesNextCalendarYear.dictionary) { (_, new) in new }
         combined.merge(LockedforecastSalesNextCalendarYear.dictionary) { (_, new) in new }
+        
+        
         combined.merge(BudgetSalesNextCalendarYear.dictionary) { (_, new) in new }
         
         // ---------- FINANCIAL: LAST YEAR / ACTUAL ----------
@@ -67,6 +78,24 @@ struct AllAnalyticsDictionaries {
         
         // ---------- FINANCIAL: NEXT YEAR / BUDGET ----------
         combined.merge(BudgetSalesNextFinancialYear.dictionary) { (_, new) in new }
+        
+        // Define the file URL.
+        // This example writes to the Documents directory with the file name "combined.json".
+        //let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        //let fileURL = documentsDirectory.appendingPathComponent("combined.json")
+
+       // do {
+            // Convert the combined dictionary to JSON data.
+        //    let jsonData = try JSONSerialization.data(withJSONObject: combined, options: .prettyPrinted)
+            
+            // Write the JSON data to the file.
+      //      try jsonData.write(to: fileURL)
+      //      print("Combined data successfully written to \(fileURL.path)")
+      //  } catch {
+      //      print("Error writing combined data to file: \(error)")
+     //   }
+
+        
         
         return combined
     }()

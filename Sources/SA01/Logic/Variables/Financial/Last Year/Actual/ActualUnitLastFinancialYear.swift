@@ -17,6 +17,21 @@ struct ActualUnitLastFinancialYear {
             "MeasureType": "actual"
         ],
     
+        "unit_last_finyear_current_period_actual_unit": [
+            "FieldType": "unit",
+            "YearType": "lastfinyear",
+            "TimePeriod": "currentfinancialperiod",
+            "MeasureType": "actual"
+        ],
+        
+        // Periods (P01 - P12)
+        "unit_last_finyear_current_fytd_actual_unit": [
+            "FieldType": "unit",
+            "YearType": "lastfinyear",
+            "TimePeriod": "currentfinancialperiod",
+            "MeasureType": "actual"
+        ],
+        
         // Periods (P01 - P12)
         "unit_last_finyear_01_period_actual_unit": [
             "FieldType": "unit",

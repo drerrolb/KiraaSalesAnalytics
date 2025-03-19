@@ -50,6 +50,13 @@
             ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "MONGO_URL"
+            value = "mongodb+srv://Josh:FMY4EtuGZuM3Wa38@cluster0.wnjdv.mongodb.net/?retryWrites=true&amp;w=majority&amp;appName=Cluster0"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

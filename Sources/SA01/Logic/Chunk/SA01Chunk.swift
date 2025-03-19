@@ -38,6 +38,7 @@ func SA01Chunk(dataframe: DataFrame,
     """
     let headerKeys = headerLine.split(separator: ",").map { String($0) }
     
+    
     // Create a safe copy of the DataFrame rows.
     let safeRows: [[String: String]] = Array(dataframe.rows).map { row in
         var safeRow: [String: String] = [:]
@@ -46,6 +47,7 @@ func SA01Chunk(dataframe: DataFrame,
         }
         return safeRow
     }
+
     
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
@@ -54,8 +56,13 @@ func SA01Chunk(dataframe: DataFrame,
     let chunkSize = 5_000
     let numberOfChunks = (totalRows + chunkSize - 1) / chunkSize
     
-    print(String(format: "Total rows: %8d, Chunk size: %8d, Number of chunks: %8d",
-                 totalRows, chunkSize, numberOfChunks))
+    
+    // Detached Task to update the Shared Logger
+    
+    Task {
+        await LoggerViewModel.shared.log(String(format: "Created a chunk with rotal rows: %8d: Chunk size: %8d, Number of chunks: %8d",
+                                                totalRows, chunkSize, numberOfChunks))
+    }
     
     // Process date parsing.
     let processDateFormatter = DateFormatter()
@@ -73,14 +80,20 @@ func SA01Chunk(dataframe: DataFrame,
         throw NSError(domain: "SA01Chunk", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing date components"])
     }
     
-    print("Current Year: \(currentYear), Current Month: \(currentMonth), Current Day: \(currentDay)")
+    Task {
+        await LoggerViewModel.shared.log("\nCurrent Year: \(currentYear), Current Month: \(currentMonth), Current Day: \(currentDay)")
+    }
     
     // Define boundaries.
     let startBoundaryComponents = DateComponents(year: currentYear - 2, month: 1, day: 1)
     guard let startOfLastCalendarYear = calendar.date(from: startBoundaryComponents) else {
         throw NSError(domain: "SA01Chunk", code: 2, userInfo: [NSLocalizedDescriptionKey: "Could not create start date"])
     }
-    print("Start of last calendar year: \(startOfLastCalendarYear)")
+    
+    Task {
+        await LoggerViewModel.shared.log("\nStart of last calendar year: \(startOfLastCalendarYear)")
+    }
+    
     
     let endBoundaryComponents = DateComponents(year: currentYear + 2, month: 12, day: 31)
     guard let endOfNextCalendarYear = calendar.date(from: endBoundaryComponents) else {

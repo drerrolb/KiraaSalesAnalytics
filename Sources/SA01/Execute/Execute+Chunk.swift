@@ -10,8 +10,6 @@ public extension SA01 {
         // Process parameters.
         let fileName = fileURL.lastPathComponent
         
-        print("\nStep 2.1")
-        print("Commenced the source load process which will take the source-sales file and split into chunks for streamlined processing.")
         LoggerManager.shared.logInfo("Commenced Source File Load Process: \(fileName)")
         
         // Define directories needed for processing.

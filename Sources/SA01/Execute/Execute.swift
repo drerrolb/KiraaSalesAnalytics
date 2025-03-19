@@ -14,9 +14,6 @@ public extension SA01 {
         // STEP 2.1: SETUP & LOGGING
         // ===================================================================================
         
-        print("\nStep 2.1")
-        print("Loading the \(fileName) file and splitting into chunks for streamlined processing.")
-        
         // Define directories needed for processing.
         let directories = [
             FileManager.default.temporaryDirectory.appendingPathComponent("chunk"),
@@ -29,6 +26,7 @@ public extension SA01 {
             print("> Created directory at path: \(directory.path)")
         }
         
+        await LoggerViewModel.shared.log("Execution started for \(strProcessDate) for \(fileName)")
         // ===================================================================================
         // STEP 2.3: DESCRIBE THE FILE
         // ===================================================================================
@@ -57,16 +55,15 @@ public extension SA01 {
         // STEP 2.4: LOAD CSV INTO DATAFRAME
         // ===================================================================================
         
-        print ("Please wait while source file is loaded into memory...")
-        print ("\n")
-        
+        await LoggerViewModel.shared.log("Please wait while source file is loaded into memory...")
         
         let dataframe: DataFrame
         do {
             dataframe = try DataFrame(contentsOfCSVFile: fileURL)
             let rowCount = dataframe.shape.rows
             let columnCount = dataframe.shape.columns
-            print("> Loaded CSV into DataFrame with \(rowCount) rows and \(columnCount) columns.")
+            await LoggerViewModel.shared.log("> Loaded CSV into DataFrame with \(rowCount) rows and \(columnCount) columns.")
+            
         } catch {
             print("> Error loading CSV into DataFrame: \(error.localizedDescription)")
             throw error
@@ -81,13 +78,12 @@ public extension SA01 {
                                             strProcessDate: strProcessDate,
                                             fiscalOffset: fiscalOffset)
         
-        print("Chunking complete. Chunk URLs: \(chunkURLs)")
-        print("\n")
+        await LoggerViewModel.shared.log("Chunking complete. Chunk URLs: \(chunkURLs)")
 
         // now generate the final analytical dataframe
         let analyticalDataframeURL = try generateAnalyticalDataframe()
-        print("Analytical DataFrame generated at: \(analyticalDataframeURL)")
-        print("\n")
+        
+        await LoggerViewModel.shared.log("Analytical DataFrame generated at: \(analyticalDataframeURL)")
         
         return analyticalDataframeURL
     }

@@ -2,6 +2,7 @@ import SwiftUI
 import AppKit
 import Foundation
 import TabularData
+import MongoSwiftSync  // Required for MongoDB operations
 
 // MARK: - Sidebar Items
 enum SidebarItem: String, CaseIterable, Identifiable {
@@ -9,55 +10,51 @@ enum SidebarItem: String, CaseIterable, Identifiable {
     case variables = "Variables Browser"
     case sourceViewer = "Source Viewer"
     case configuration = "Configuration"
-    // New menu option for numeric column sums.
+    // Existing menu option for numeric column sums.
     case numericSum = "Numeric Sum"
+    // New menu option for downloading documents.
+    case downloadDocuments = "Download Documents"
     
     var id: String { rawValue }
 }
 
 // MARK: - MainContentView
 struct MainContentView: View {
-    @State private var activeSheet: SidebarItem? = nil
+    @State private var selectedSidebarItem: SidebarItem? = .integration
 
     var body: some View {
         NavigationSplitView {
-            // Sidebar
-            List {
-                ForEach(SidebarItem.allCases, id: \.self) { item in
-                    Button(item.rawValue) {
-                        handleSelection(item)
-                    }
-                    .buttonStyle(.plain)
+            // Sidebar: Bind the list selection to the state variable.
+            List(SidebarItem.allCases, selection: $selectedSidebarItem) { item in
+                Text(item.rawValue)
+                    .tag(item) // Ensure each row is tagged with the corresponding item.
+            }
+            .listStyle(.sidebar)
+        } detail: {
+            // Update the detail view based on the selected sidebar item.
+            Group {
+                switch selectedSidebarItem {
+                case .integration:
+                    IntegrationContentView()
+                case .variables:
+                    VariablesBrowserContentView()
+                case .sourceViewer:
+                    SourceContentView()
+                case .configuration:
+                    ConfigurationView()
+                case .numericSum:
+                    NumericSumView()
+                case .downloadDocuments:
+                    DownloadDocumentsView()
+                case .none:
+                    Text("Select an option from the sidebar")
                 }
             }
-        } detail: {
-            Text("Select an option from the sidebar to open a modal.")
         }
-        // Present a SwiftUI sheet based on the selected sidebar item.
-        .sheet(item: $activeSheet) { item in
-            switch item {
-            case .integration:
-                IntegrationContentView()
-            case .variables:
-                VariablesBrowserContentView()
-            case .sourceViewer:
-                SourceContentView()
-            case .configuration:
-                ConfigurationView()
-            case .numericSum:
-                NumericSumView()  // New view for numeric sum
-            }
-        }
-    }
-    
-    /// Called when a user taps a sidebar item.
-    private func handleSelection(_ item: SidebarItem) {
-        activeSheet = item
     }
 }
 
-
-// MARK: - Basic App
+// MARK: - Basic App Delegate for macOS
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         true

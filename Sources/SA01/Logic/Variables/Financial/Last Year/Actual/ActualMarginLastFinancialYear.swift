@@ -16,8 +16,16 @@ struct ActualMarginLastFinancialYear {
             "MeasureType": "actual"
         ],
         
+        // Periods (P01 - P12)
+        "margin_last_finyear_current_period_actual_value": [
+            "FieldType": "margin",
+            "YearType": "lastfinyear",
+            "TimePeriod": "currentfinancialperiod",
+            "MeasureType": "actual"
+        ],
+        
         // Current financial year values
-        "margin_last_finyear_current_ytd_actual_value": [
+        "margin_last_finyear_current_fytd_actual_value": [
             "FieldType": "margin",
             "YearType": "lastfinyear",
             "TimePeriod": "currentfinancialytd",

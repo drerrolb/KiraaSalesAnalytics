@@ -12,8 +12,10 @@ public func SA01Execute(_ fileURL: URL,
                         strProcessDate: String,
                         fiscalOffset: Int) async throws -> URL {
     
+
+    // Log the file creation
     let fileName = fileURL.lastPathComponent
-    print("Starting SA01 execution with file: \(fileName)")
+    await LoggerViewModel.shared.log("Execution started for \(strProcessDate) for \(fileName)")
     
     // Call the execute method using async/await, which returns the URL of the generated dataframe.csv.
     let dataframeURL = try await SA01.shared.execute(fileURL: fileURL,
@@ -52,12 +54,9 @@ public func SA01Execute(_ fileURL: URL,
                       userInfo: [NSLocalizedDescriptionKey: "Failed to create zip archive."])
     }
     
-    print("Zipped dataframe.csv to \(destinationZipURL.path) with new filename: \(zipFileName)")
+    // Log zipfile creation
+    await LoggerViewModel.shared.log("Zipped dataframe.csv to \(destinationZipURL.path) with new filename: \(zipFileName)")
     
-    print("\n")
-    print("> Variables generated:")
-    let variableGenerator = SAVariableGenerator()
-    variableGenerator.printAllVariables()
     
     return destinationZipURL
 }

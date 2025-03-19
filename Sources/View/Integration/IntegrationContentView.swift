@@ -123,8 +123,8 @@ struct IntegrationContentView: View {
                 .padding(.top)
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(logger.messages, id: \.self) { message in
-                        Text(message)
+                    ForEach(logger.messages.indices, id: \.self) { index in
+                        Text(logger.messages[index])
                             .font(.system(.caption, design: .monospaced))
                             .foregroundColor(.green)
                     }

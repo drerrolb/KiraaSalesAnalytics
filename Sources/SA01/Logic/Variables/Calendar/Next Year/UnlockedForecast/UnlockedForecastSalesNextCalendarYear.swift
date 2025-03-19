@@ -5,7 +5,7 @@
 //  Created by Errol Brandt on 1/3/2025.
 //
 
-struct UnlockedforecastSalesNextCalendarYear {
+struct UnlockedForecastSalesNextCalendarYear {
     static let dictionary: [String: [String: String]] = [
         "sales_next_year_current_month_unlockedforecast_value": [
             "FieldType": "sales",

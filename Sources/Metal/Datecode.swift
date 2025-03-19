@@ -296,7 +296,8 @@ private func processDateCodesWithMetal(
     // =========================================================================================
     
     // strip out the months
-    let processMonth = (processDate / 100) % 100
+    let processMonth =  (processDate / 100) % 100
+    let processPeriod = ((processMonth - 1) + financialOffset) % 12 + 1
 
     // look up the current Calendar Month Key
     let calendarMonthKeys = [
@@ -328,7 +329,7 @@ private func processDateCodesWithMetal(
             "p07", "p08", "p09", "p10", "p11", "p12"
     ]
     
-    let currentFinancialPeriodKey = financialPeriodKeys[Int(processMonth) - 1]
+    let currentFinancialPeriodKey = financialPeriodKeys[Int(processPeriod) - 1]
     
     //print ("Current Financial Period is key is \(currentFinancialPeriodKey)")
     
@@ -339,7 +340,7 @@ private func processDateCodesWithMetal(
         "p07ytd", "p08ytd", "p09ytd", "p10ytd", "p11ytd", "p12ytd"
     ]
     
-    let currentFinancialYTDKey = financialYTDKeys[Int(processMonth) - 1]
+    let currentFinancialYTDKey = financialYTDKeys[Int(processPeriod) - 1]
     
     //print ("Current Financial Period is key is \(currentFinancialYTDKey)")
     
