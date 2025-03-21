@@ -28,7 +28,7 @@ struct ActualUnitLastFinancialYear {
         "unit_last_finyear_current_fytd_actual_unit": [
             "FieldType": "unit",
             "YearType": "lastfinyear",
-            "TimePeriod": "currentfinancialperiod",
+            "TimePeriod": "currentfinancialytd",
             "MeasureType": "actual"
         ],
         

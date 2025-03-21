@@ -6,13 +6,12 @@ import MongoSwiftSync  // Required for MongoDB operations
 
 // MARK: - Sidebar Items
 enum SidebarItem: String, CaseIterable, Identifiable {
+    case home = "Home Screen"
     case integration = "Integration"
     case variables = "Variables Browser"
     case sourceViewer = "Source Viewer"
     case configuration = "Configuration"
-    // Existing menu option for numeric column sums.
     case numericSum = "Numeric Sum"
-    // New menu option for downloading documents.
     case downloadDocuments = "Download Documents"
     
     var id: String { rawValue }
@@ -20,7 +19,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 
 // MARK: - MainContentView
 struct MainContentView: View {
-    @State private var selectedSidebarItem: SidebarItem? = .integration
+    @State private var selectedSidebarItem: SidebarItem? = .home
 
     var body: some View {
         NavigationSplitView {
@@ -34,6 +33,8 @@ struct MainContentView: View {
             // Update the detail view based on the selected sidebar item.
             Group {
                 switch selectedSidebarItem {
+                case .home:
+                    HomeContentView()
                 case .integration:
                     IntegrationContentView()
                 case .variables:
@@ -53,6 +54,7 @@ struct MainContentView: View {
         }
     }
 }
+
 
 // MARK: - Basic App Delegate for macOS
 class AppDelegate: NSObject, NSApplicationDelegate {

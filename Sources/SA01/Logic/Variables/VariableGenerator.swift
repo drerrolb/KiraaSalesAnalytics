@@ -59,6 +59,18 @@ class SAVariableGenerator {
         UnlockedForecastUnitThisCalendarYear.dictionary,
         UnlockedForecastVolumeThisCalendarYear.dictionary,
 
+        // MARK: Forecast - This Financial Year
+        LockedForecastSalesThisFinancialYear.dictionary,
+        LockedForecastMarginThisFinancialYear.dictionary,
+        LockedForecastUnitThisFinancialYear.dictionary,
+        LockedForecastVolumeThisFinancialYear.dictionary,
+        
+        UnlockedForecastSalesThisFinancialYear.dictionary,
+        UnlockedForecastMarginThisFinancialYear.dictionary,
+        UnlockedForecastUnitThisFinancialYear.dictionary,
+        UnlockedForecastVolumeThisFinancialYear.dictionary,
+        
+        
         // MARK: Forecast - Next Calendar Year
         LockedforecastSalesNextCalendarYear.dictionary,
         UnlockedForecastSalesNextCalendarYear.dictionary,

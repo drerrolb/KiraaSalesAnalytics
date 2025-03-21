@@ -76,6 +76,21 @@ struct AllAnalyticsDictionaries {
         combined.merge(BudgetVolumeThisFinancialYear.dictionary) { (_, new) in new }
         combined.merge(BudgetUnitThisFinancialYear.dictionary) { (_, new) in new }
         
+        
+        // ---------- FINANCIAL: THIS YEAR / FORECAST ----------
+        combined.merge(LockedForecastSalesThisFinancialYear.dictionary) { (_, new) in new }
+        combined.merge(LockedForecastMarginThisFinancialYear.dictionary) { (_, new) in new }
+        combined.merge(LockedForecastUnitThisFinancialYear.dictionary) { (_, new) in new }
+        combined.merge(LockedForecastVolumeThisFinancialYear.dictionary) { (_, new) in new }
+        
+        
+        combined.merge(UnlockedForecastSalesThisFinancialYear.dictionary) { (_, new) in new }
+        combined.merge(UnlockedForecastMarginThisFinancialYear.dictionary) { (_, new) in new }
+        combined.merge(UnlockedForecastUnitThisFinancialYear.dictionary) { (_, new) in new }
+        combined.merge(UnlockedForecastVolumeThisFinancialYear.dictionary) { (_, new) in new }
+
+        
+        
         // ---------- FINANCIAL: NEXT YEAR / BUDGET ----------
         combined.merge(BudgetSalesNextFinancialYear.dictionary) { (_, new) in new }
         
